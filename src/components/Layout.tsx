@@ -27,14 +27,16 @@ export default function Layout({ children }: LayoutProps) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, !!session);
         setSession(session);
-        if (!session) {
+        if (!session && event !== 'INITIAL_SESSION') {
           navigate('/auth');
         }
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', !!session);
       setSession(session);
       if (!session) {
         navigate('/auth');
@@ -56,7 +58,16 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   if (!session) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-gradient-primary p-3 rounded-2xl shadow-glow mb-4 mx-auto w-fit">
+            <GraduationCap className="h-8 w-8 text-white animate-pulse" />
+          </div>
+          <p className="text-muted-foreground">Chargement...</p>
+        </div>
+      </div>
+    );
   }
 
   const menuItems = [
